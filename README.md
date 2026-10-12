@@ -4,7 +4,9 @@ Chattr is a texting simulator for language learners. You pick a scenario and a t
 language, and an AI character (Google Gemini) texts with you in that language inside a
 phone-style chat window. It can correct your grammar as you go, suggest replies, translate
 messages on tap, and grade the conversation when it ends. It was built for a university
-language program, so access is invite-only by design.
+language program, so access is invite-only by default: accounts are created from the command
+line. Set `ALLOW_SIGNUP=true` to let people register themselves (see
+[Accounts and passwords](#accounts-and-passwords) for the cost tradeoff).
 
 <p align="center">
   <img src="docs/media/hero.gif" width="320" alt="Animated demo: picking the Making Plans scenario in Italian, sending a message with a grammar mistake, receiving a reply with a correction under the message, then tapping the reply to show its English translation">
@@ -174,6 +176,9 @@ Fill in the four required values:
 | `BETTER_AUTH_SECRET` | A random secret, e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` |
 | `BETTER_AUTH_URL` | `http://localhost:3000` for local development |
 
+To allow self-registration, also set `ALLOW_SIGNUP=true` (see
+[Accounts and passwords](#accounts-and-passwords)).
+
 ### 4. Install and create the tables
 
 ```bash
@@ -186,7 +191,7 @@ unless it is already set in your shell, so exporting it is a way to target anoth
 
 ### 5. Create the first account
 
-Sign-up is disabled, so accounts are created from the command line:
+Sign-up is disabled by default, so accounts are created from the command line:
 
 ```bash
 npx tsx --env-file=.env.local scripts/create-user.ts <email> "<name>" [password]
@@ -194,6 +199,9 @@ npx tsx --env-file=.env.local scripts/create-user.ts <email> "<name>" [password]
 
 If you leave out the password, a random one is generated and printed once. Send it to the
 user yourself; the app has no email provider.
+
+If you set `ALLOW_SIGNUP=true`, this step is optional: you can register at `/auth/signup`
+instead.
 
 ### 6. Run it
 
@@ -205,9 +213,17 @@ Open http://localhost:3000 and sign in.
 
 ### Accounts and passwords
 
-Sign-up is turned off on purpose. Every chat turn costs Gemini API usage, so the app is
-invite-only: `/auth/signup` shows a notice, and Better Auth's sign-up endpoint is disabled
-(`emailAndPassword.disableSignUp` in `src/lib/auth.ts`). There is no admin UI.
+Sign-up is off by default, on purpose. Every chat turn costs Gemini API usage, billed to
+your key, so out of the box the app is invite-only: `/auth/signup` shows a notice, and Better
+Auth's sign-up endpoint is disabled (`emailAndPassword.disableSignUp` in `src/lib/auth.ts`).
+There is no admin UI.
+
+To open registration, set `ALLOW_SIGNUP=true`. Only that exact value enables it; anything
+else, including leaving it unset, keeps sign-up off. `/auth/signup` then shows a form (name,
+email, password of at least 8 characters) and signs the new user in. Be aware that anyone who
+finds an open deployment can create an account and run chats on your Gemini key, so set a
+budget or quota on the key before you turn it on. The variable is read by the server at
+runtime, so changing it needs a restart or redeploy, not a rebuild.
 
 To reset a password:
 
@@ -226,12 +242,16 @@ This also revokes the user's existing sessions.
    `VERCEL_URL`, so auth works on each preview without pointing back at production.
 4. If users reach the app through additional origins, such as a custom domain alongside the
    default one or a branch alias, list them in `TRUSTED_ORIGINS` (comma-separated).
+5. Optionally, set `ALLOW_SIGNUP=true` to open self-registration (see
+   [Accounts and passwords](#accounts-and-passwords)). Leave it unset to stay invite-only.
+   Vercel applies environment variable changes on the next deployment, so redeploy after
+   changing it.
 
 The trusted auth origins are `BETTER_AUTH_URL`, `https://$VERCEL_URL`, everything in
 `TRUSTED_ORIGINS`, and `http://localhost:3000` / `http://localhost:3001`.
 
-Run `db:push` against the production database once, as in step 4 above, and create accounts
-with `scripts/create-user.ts` pointed at that database's `DATABASE_URL`.
+Run `db:push` against the production database once, as in step 4 above. Unless sign-up is
+open, create accounts with `scripts/create-user.ts` pointed at that database's `DATABASE_URL`.
 
 ## Configuration
 
@@ -249,6 +269,12 @@ against the output cap, so the app raises the caps for non-2.5 models or when re
 thinking is on.
 
 `TRUSTED_ORIGINS` is described under [Deploying to Vercel](#deploying-to-vercel).
+
+Access control, read in `src/lib/signup.ts`:
+
+| Variable | Used for | Default |
+|---|---|---|
+| `ALLOW_SIGNUP` | Self-registration at `/auth/signup`. Only the exact value `true` enables it | off (invite-only) |
 
 ## Scripts
 
@@ -278,7 +304,8 @@ It makes real API calls and is billed like normal usage.
 Every signed-in chat turn calls Gemini. Hints, translations, word-bank lookups and the
 end-of-conversation report card call it too. Guests only get the scripted demo
 (`src/hooks/useDemoChat.ts`), which makes no Gemini calls, and all Gemini-backed API routes
-require a signed-in session. Sessions are cached in a signed cookie for 5 minutes to reduce
+require a signed-in session. That only limits cost while sign-up is off: with
+`ALLOW_SIGNUP=true`, anyone who finds the site can create an account and use your key. Sessions are cached in a signed cookie for 5 minutes to reduce
 database queries, since each query wakes a scaled-to-zero Neon compute.
 
 See [`docs/diagnostics.md`](docs/diagnostics.md) for the logging and the failure-event table.

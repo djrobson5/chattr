@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { isSignupAllowed } from "@/lib/signup";
 
 /**
  * BETTER_AUTH_URL is set for production only. Preview deployments fall through
@@ -47,10 +48,12 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    // Access is invite-only (accounts are created with scripts/create-user.ts).
-    // The signup page is a static notice; this enforces the same rule at the
-    // API, so the endpoint cannot be used to self-register.
-    disableSignUp: true,
+    // Invite-only unless ALLOW_SIGNUP is exactly "true" (see lib/signup.ts).
+    // When off, accounts are created with scripts/create-user.ts and
+    // /auth/signup shows a notice; this enforces the same rule at the API, so
+    // the endpoint cannot be used to self-register. Read once when the server
+    // starts, so changing it needs a restart or redeploy, not a rebuild.
+    disableSignUp: !isSignupAllowed(),
   },
 
   session: {

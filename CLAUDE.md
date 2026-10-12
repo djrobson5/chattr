@@ -30,6 +30,10 @@ Optional:
 
 - `TRUSTED_ORIGINS` — comma-separated extra auth origins (e.g. custom domains). `lib/auth.ts`
   always trusts `BETTER_AUTH_URL`, `https://$VERCEL_URL` and localhost:3000/3001.
+- `ALLOW_SIGNUP` — set to exactly `true` to open self-registration at `/auth/signup`. Anything
+  else (unset, `false`, typos) keeps the app invite-only, which is the default because every
+  chat turn bills the Gemini key. Server-side only, checked by `lib/signup.ts`; never a
+  `NEXT_PUBLIC_` variable.
 
 Optional model overrides, read in `lib/gemini.ts`. With none set, every route runs
 `gemini-2.5-flash` with thinking off.
@@ -98,10 +102,23 @@ Gemini responses embed structured markers that get parsed server-side:
 ### Auth Flow
 
 Better Auth with email + password, configured in `lib/auth.ts` and served from
-`/api/auth/[...all]`. Sign-in page at `/auth/login`; `/auth/signup` is a static invite-only
-notice, and `emailAndPassword.disableSignUp` enforces that at the API too.
+`/api/auth/[...all]`. Sign-in page at `/auth/login`: a server `page.tsx` wrapping the client
+`LoginForm`, which shows a "Sign up" link when sign-up is allowed and an invitation-only note
+otherwise.
 
-- `lib/auth-client.ts` — browser client (`authClient.useSession()`, `signIn.email`, `signOut`).
+Sign-up is controlled by `ALLOW_SIGNUP` via `isSignupAllowed()` in `lib/signup.ts` (only the
+exact value `true` enables it):
+
+- `app/auth/signup/page.tsx` is a server component that calls `await connection()` so it
+  reads the variable per request, then renders `SignupForm` (name, email, password via
+  `authClient.signUp.email`; Better Auth signs the user in, then it goes to `/`) or the
+  `InviteOnlyNotice`.
+- `lib/auth.ts` sets `emailAndPassword.disableSignUp` from the same check, so the API matches
+  the page. That value is read once at server start; changing the variable needs a restart
+  or redeploy, not a rebuild.
+
+- `lib/auth-client.ts` — browser client (`authClient.useSession()`, `signIn.email`,
+  `signUp.email`, `signOut`).
 - `lib/auth-context.tsx` — wraps the session as `AppUser` (`id`, `email`, `name`, `image`).
 - `lib/auth-guard.ts` — `requireAuth()` for API routes, returning `{ user } | NextResponse`.
 
@@ -109,7 +126,8 @@ Sessions use a 5-minute signed cookie cache, so a page load does not hit the dat
 time — this matters on Neon, where each query wakes the compute and bills CU-hours. The
 tradeoff is that a revoked session can stay live for up to that window.
 
-**Provisioning accounts** (no admin UI, no email provider — send passwords out of band):
+**Provisioning accounts** (the only way in when sign-up is off; no admin UI, no email
+provider — send passwords out of band):
 
 ```bash
 npx tsx --env-file=.env.local scripts/create-user.ts <email> "<name>" [password]

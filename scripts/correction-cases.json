@@ -1,0 +1,20 @@
+[
+  {"id":"it-1","scenario":"making-plans-italian","difficulty":"beginner","message":"Io voglio andare al cinema con te","expect":"CORRECT"},
+  {"id":"it-2","scenario":"making-plans-italian","difficulty":"intermediate","message":"Possiamo andare a la spiaggia sabato?","expect":"a la → alla (articulated preposition)"},
+  {"id":"it-3","scenario":"airbnb-host-italian","difficulty":"intermediate","message":"Buongiorno! Penso di arrivare a le tre del pomeriggio.","expect":"a le → alle"},
+  {"id":"it-4","scenario":"catching-up-italian","difficulty":"intermediate","message":"Sto bene! Ieri ho andato al mare con mia sorella.","expect":"ho andato → sono andato/a (essere auxiliary)"},
+  {"id":"it-5","scenario":"local-recommendations-italian","difficulty":"beginner","message":"Sto per cinque giorni. Sono molto eccitato!","expect":"eccitato is a false friend (sexual connotation) → emozionato/entusiasta; 'sto per' means 'about to' → resto/sto cinque giorni"},
+  {"id":"it-6","scenario":"texting-roommate-italian","difficulty":"advanced","message":"Sì, sono a casa. Cmq nn abbiamo più latte, lo compri tu?","expect":"CORRECT (texting abbreviations are appropriate at advanced)"},
+  {"id":"it-7","scenario":"nonnas-recipe-italian","difficulty":"intermediate","message":"Nonna, puoi darmi la ricetta per il tiramisù? Io penso che è il migliore dolce.","expect":"penso che è → penso che sia (subjunctive); il migliore dolce → il dolce migliore / il miglior dolce"},
+  {"id":"es-1","scenario":"making-plans-spanish","difficulty":"beginner","message":"Yo quiero ir a la playa. Es muy divertido!","expect":"CORRECT (missing ¡ is acceptable in texting)"},
+  {"id":"es-2","scenario":"catching-up-spanish","difficulty":"intermediate","message":"Estoy bien! Estoy muy embarazada porque no te escribí.","expect":"embarazada = pregnant (false friend) → avergonzada"},
+  {"id":"es-3","scenario":"airbnb-host-spanish","difficulty":"intermediate","message":"Buenos días. Pienso llegar a las tres. Es la casa cerca de la playa?","expect":"Es → Está (estar for location)"},
+  {"id":"es-4","scenario":"texting-roommate-spanish","difficulty":"intermediate","message":"Sí, estoy en casa. Mi gusta cocinar, yo puedo hacer la cena.","expect":"Mi gusta → Me gusta"},
+  {"id":"es-5","scenario":"group-event-spanish","difficulty":"advanced","message":"Ns, q te parece si hacemos una barbacoa en el finde?","expect":"CORRECT (texting abbreviations at advanced)"},
+  {"id":"fr-1","scenario":"making-plans-french","difficulty":"intermediate","message":"On peut aller au cinéma. Je suis 20 ans donc je peux voir tous les films lol","expect":"Je suis 20 ans → J'ai 20 ans"},
+  {"id":"fr-2","scenario":"meetup-new-city-french","difficulty":"beginner","message":"Oui, je suis arrivé! Je suis à la gare. Où est tu?","expect":"est tu → es-tu"},
+  {"id":"fr-3","scenario":"airbnb-host-french","difficulty":"intermediate","message":"Bonjour, je vais arriver à 15h. Est-ce que il y a un parking?","expect":"Est-ce que il → Est-ce qu'il (elision)"},
+  {"id":"fr-4","scenario":"catching-up-french","difficulty":"intermediate","message":"Ça va bien, merci! Je suis allée au Paris le mois dernier.","expect":"au Paris → à Paris"},
+  {"id":"en-1","scenario":"making-plans-english","difficulty":"beginner","message":"I want go to the beach with you","expect":"want go → want to go"},
+  {"id":"en-2","scenario":"texting-roommate-english","difficulty":"intermediate","message":"yeah im home, we need milk and eggs right?","expect":"CORRECT (casual texting)"}
+]
